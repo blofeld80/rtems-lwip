@@ -1,14 +1,12 @@
 {
 	"header-paths-to-import": [
-		"uLan/ports/driver/tms570_emac",
-		"uLan/ports/os",
-		"rtemslwip/tms570",
+		"rtemslwip/tms570/include",
 		"cpsw/src/include"
 	],
 	"source-files-to-import": [
-		"uLan/ports/driver/tms570_emac/eth_lwip.c",
-		"uLan/ports/driver/tms570_emac/phy_dp83848h.c",
-		"uLan/ports/driver/tms570_emac/tms570_netif.c",
+		"rtemslwip/tms570/eth_lwip.c",
+		"rtemslwip/tms570/phy_dp83848h.c",
+		"rtemslwip/tms570/tms570_netif.c",
 		"cpsw/src/locator.c",
 		"cpsw/src/perf.c",
 		"cpsw/src/delay.c",

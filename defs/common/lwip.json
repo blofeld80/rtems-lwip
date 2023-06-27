@@ -2,11 +2,11 @@
 	"header-paths-to-import": [
 		"rtemslwip/bsd_compat_include",
 		"lwip/src/include",
-		"uLan/ports/os/rtems",
+		"rtemslwip/include/arch",
 		"rtemslwip/include"
 	],
 	"source-files-to-import" : [
-		"uLan/ports/os/rtems/arch/sys_arch.c",
+		"rtemslwip/common/sys_arch.c",
 		"rtemslwip/common/syslog.c",
 		"rtemslwip/common/rtems_lwip_io.c",
 		"rtemslwip/common/netstart_shared.c",
