@@ -31,8 +31,6 @@
 #include "config.h"
 #endif
 
-#define LWIP_COMPAT_SOCKETS 0
-
 #include <string.h>
 #include <stdarg.h>
 /* #include <stdlib.h> */
