@@ -6,8 +6,7 @@
 		"embeddedsw/XilinxProcessorIPLib/drivers/emacps/src",
 		"rtemslwip/xilinx",
 		"rtemslwip/zynqmp",
-		"embeddedsw/lib/bsp/standalone/src/arm/ARMv8/64bit",
-		"embeddedsw/lib/bsp/standalone/src/arm/common"
+		"embeddedsw/lib/bsp/standalone/src/arm/ARMv8/64bit"
 	],
 	"source-files-to-import": [
 		"rtemslwip/zynqmp/xemacps_g.c",
