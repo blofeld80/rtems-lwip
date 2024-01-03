@@ -372,7 +372,7 @@ sys_request_irq(unsigned int irqnum, sys_irq_handler_t handler,
 sys_prot_t
 sys_arch_protect()
 {
-  sys_prot_t pval;
+  sys_prot_t pval = 0;
 
 #if RTEMS_SMP
   rtems_recursive_mutex_lock( &sys_arch_lock );
