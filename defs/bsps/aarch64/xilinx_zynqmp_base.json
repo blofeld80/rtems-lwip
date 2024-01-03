@@ -2,13 +2,11 @@
 	"header-paths-to-import": [
 		"embeddedsw/ThirdParty/sw_services/lwip211/src/contrib/ports/xilinx/include",
 		"embeddedsw/lib/bsp/standalone/src/common",
-		"embeddedsw/XilinxProcessorIPLib/drivers/common/src/",
 		"embeddedsw/XilinxProcessorIPLib/drivers/scugic/src",
 		"embeddedsw/XilinxProcessorIPLib/drivers/emacps/src",
 		"rtemslwip/xilinx",
 		"rtemslwip/zynqmp",
 		"embeddedsw/lib/bsp/standalone/src/arm/ARMv8/64bit",
-		"embeddedsw/lib/bsp/standalone/src/arm/common/gcc",
 		"embeddedsw/lib/bsp/standalone/src/arm/common"
 	],
 	"source-files-to-import": [
