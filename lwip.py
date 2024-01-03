@@ -137,9 +137,10 @@ def build(bld):
                 includes=' '.join(test_app_incl))
 
     lib_path = os.path.join(bld.env.PREFIX, arch_lib_path)
-    bld.read_stlib('telnetd', paths=[lib_path])
-    bld.read_stlib('rtemstest', paths=[lib_path])
-    bld.read_stlib('ftpd', paths=[lib_path])
+    rtems_lib_path = os.path.join(bld.env.RTEMS_PATH, arch_lib_path)
+    bld.read_stlib('telnetd', paths=[lib_path, rtems_lib_path])
+    bld.read_stlib('rtemstest', paths=[lib_path, rtems_lib_path])
+    bld.read_stlib('ftpd', paths=[lib_path, rtems_lib_path])
 
     bld.program(features='c',
                 target='telnetd01.exe',
