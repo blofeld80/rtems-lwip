@@ -171,7 +171,14 @@ xemac_add(struct netif *netif,
 #if defined (__arm__) || defined (__aarch64__)
 			case xemac_type_emacps:
 #ifdef XLWIP_CONFIG_INCLUDE_GEM
+#ifndef __rtems__
 				return netif_add(netif, ipaddr, netmask, gw,
+#else /* __rtems__ */
+				return netif_add( netif,
+						(const ip4_addr_t *) ipaddr,
+						(const ip4_addr_t *) netmask,
+						(const ip4_addr_t *) gw,
+#endif
 						(void*)mac_baseaddr,
 						xemacpsif_init,
 #if NO_SYS
@@ -184,8 +191,14 @@ xemac_add(struct netif *netif,
 #endif
 #endif
 			default:
+#ifndef __rtems__
 				xil_printf("unable to determine type of EMAC with baseaddress 0x%08x\r\n",
 						mac_baseaddr);
+#else /* __rtems__ */
+				xil_printf("unable to determine type of EMAC with baseaddress %" PRIXPTR,
+						mac_baseaddr);
+				xil_printf("\r\n");
+#endif
 				return NULL;
 	}
 }
