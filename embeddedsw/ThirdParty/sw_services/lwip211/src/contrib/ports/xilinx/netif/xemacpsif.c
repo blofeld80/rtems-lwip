@@ -61,14 +61,24 @@
 
 #if LWIP_IGMP
 static err_t xemacpsif_mac_filter_update (struct netif *netif,
+#ifndef __rtems__
 							ip_addr_t *group, u8_t action);
+#else /* __rtems__ */
+							const ip4_addr_t *group,
+							enum netif_mac_filter_action action);
+#endif
 
 static u8_t xemacps_mcast_entry_mask = 0;
 #endif
 
 #if LWIP_IPV6 && LWIP_IPV6_MLD
 static err_t xemacpsif_mld6_mac_filter_update (struct netif *netif,
+#ifndef __rtems__
 							ip_addr_t *group, u8_t action);
+#else /* __rtems__ */
+							const ip6_addr_t *group,
+							enum netif_mac_filter_action action);
+#endif
 
 static u8_t xemacps_mld6_mcast_entry_mask;
 #endif
@@ -236,7 +246,11 @@ static struct pbuf * low_level_input(struct netif *netif)
  */
 
 static err_t xemacpsif_output(struct netif *netif, struct pbuf *p,
+#ifndef __rtems__
 		const ip_addr_t *ipaddr)
+#else /* __rtems__ */
+		const ip4_addr_t *ipaddr)
+#endif
 {
 	/* resolve hardware address, then send (or queue) packet */
 	return etharp_output(netif, p, ipaddr);
@@ -498,7 +512,11 @@ void HandleTxErrors(struct xemac_s *xemac)
 }
 
 #if LWIP_IPV6 && LWIP_IPV6_MLD
+#ifndef __rtems__
 static u8_t xemacpsif_ip6_addr_ismulticast(ip6_addr_t* ip_addr)
+#else /* __rtems__ */
+static u8_t xemacpsif_ip6_addr_ismulticast(const ip6_addr_t* ip_addr)
+#endif
 {
 	if(ip6_addr_ismulticast_linklocal(ip_addr)||
            ip6_addr_ismulticast_iflocal(ip_addr)   ||
@@ -514,7 +532,11 @@ static u8_t xemacpsif_ip6_addr_ismulticast(ip6_addr_t* ip_addr)
 }
 
 static void xemacpsif_mld6_mac_hash_update (struct netif *netif, u8_t *ip_addr,
+#ifndef __rtems__
 		u8_t action)
+#else /* __rtems__ */
+		enum netif_mac_filter_action action)
+#endif
 {
 	u8_t multicast_mac_addr[6];
 	struct xemac_s *xemac = (struct xemac_s *) (netif->state);
@@ -557,14 +579,24 @@ static void xemacpsif_mld6_mac_hash_update (struct netif *netif, u8_t *ip_addr,
 	SYS_ARCH_UNPROTECT(lev);
 }
 
+#ifndef __rtems__
 static err_t xemacpsif_mld6_mac_filter_update (struct netif *netif, ip_addr_t *group,
 		u8_t action)
+#else /* __rtems__ */
+static err_t xemacpsif_mld6_mac_filter_update (struct netif *netif,
+							const ip6_addr_t *group,
+							enum netif_mac_filter_action action)
+#endif
 {
 	u8_t temp_mask;
 	unsigned int i;
 	u8_t * ip_addr = (u8_t *) group;
 
+#ifndef __rtems__
 	if(!(xemacpsif_ip6_addr_ismulticast((ip6_addr_t*) ip_addr))) {
+#else /* __rtems__ */
+	if(!(xemacpsif_ip6_addr_ismulticast( group ))) {
+#endif
 		LWIP_DEBUGF(NETIF_DEBUG,
                                 ("%s: The requested MAC address is not a multicast address.\r\n", __func__));								 LWIP_DEBUGF(NETIF_DEBUG,
 		                ("Multicast address add operation failure !!\r\n"));
@@ -620,8 +652,13 @@ static err_t xemacpsif_mld6_mac_filter_update (struct netif *netif, ip_addr_t *g
 #endif
 
 #if LWIP_IGMP
+#ifndef __rtems__
 static void xemacpsif_mac_hash_update (struct netif *netif, u8_t *ip_addr,
 		u8_t action)
+#else /* __rtems__ */
+static void xemacpsif_mac_hash_update (struct netif *netif, u8_t *ip4_addr_t,
+		enum netif_mac_filter_action action)
+#endif
 {
 	u8_t multicast_mac_addr[6];
 	struct xemac_s *xemac = (struct xemac_s *) (netif->state);
