@@ -28,6 +28,11 @@
 #define XPSEUDO_ASM_H
 
 #include <rtems/score/cpu.h>
+#if defined(__aarch64__)
 #define dsb() _AARCH64_Data_synchronization_barrier()
+#else
+#define dsb() _ARM_Data_synchronization_barrier()
+#define isb() _ARM_Instruction_synchronization_barrier()
+#endif
 
 #endif

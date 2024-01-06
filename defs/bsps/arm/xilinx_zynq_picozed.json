@@ -1,0 +1,13 @@
+{
+	"includes": [
+		"xilinx_zynq_base"
+	],
+	"header-paths-to-import": [
+		"rtemslwip/zynq_picozed"
+	],
+	"source-files-to-import": [
+		"rtemslwip/zynq_picozed/xemacps_g.c",
+		"rtemslwip/zynq_picozed/xtopology_g.c",
+		"rtemslwip/zynq_picozed/netstart.c"
+	]
+}

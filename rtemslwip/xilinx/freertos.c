@@ -24,45 +24,41 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "xil_mmu.h"
-#include <rtems/rtems/cache.h>
 #include <rtems/rtems/intr.h>
 #include <rtems/score/threadimpl.h>
-#include <libcpu/mmu-vmsav8-64.h>
 #include <stdio.h>
 #include <string.h>
+#include "xil_types.h"
+#include "FreeRTOS.h"
 
-#define TWO_MB (2*1024*1024)
-#define ONE_GB (1024*1024*1024)
 
 /*
- * When altering memory attributes, Xilinx sets them for differing memory sizes
- * depending on what area of memory they are in. Any attribute changes below 4GB
- * apply to 2MB chunks while any changes above 4GB apply to 1GB chunks.
+ * XInterruptHandler function pointer signature just happens to exactly match
+ * rtems_interrupt_handler
  */
-void Xil_SetTlbAttributes( UINTPTR Addr, u64 attrib )
+BaseType_t xPortInstallInterruptHandler(
+  uint8_t           ucInterruptID,
+  XInterruptHandler pxHandler,
+  void             *pvCallBackRef
+)
 {
-  rtems_status_code sc;
-  sc = aarch64_mmu_map(
-    Addr,
-    Addr < 0x100000000 ? TWO_MB : ONE_GB,
-    attrib
-  );
-  if ( sc == RTEMS_NO_MEMORY ) {
-    printf("Out of memory setting MMU attributes on ptr %p: 0x%lx\n", (void*)Addr, attrib);
-  } else if ( sc == RTEMS_INVALID_ADDRESS ) {
-    printf("Attempted to set MMU attributes on invalid ptr %p: 0x%lx\n", (void*)Addr, attrib);
-  } else if ( sc != RTEMS_SUCCESSFUL ) {
-    printf("Failed setting MMU attributes on ptr %p: 0x%lx\n", (void*)Addr, attrib);
+  char name[10];
+
+  /* Is this running in the context of any interrupt server tasks? */
+  _Thread_Get_name( _Thread_Get_executing(), name, sizeof( name ) );
+  if (strcmp(name, "IRQS") == 0) {
+    /* Can't run this from within an IRQ Server thread context */
+    return RTEMS_ILLEGAL_ON_SELF;
   }
-}
 
-/*
- * The Xilinx code was written such that it assumed there was no invalidate-only
- * functionality on A53 cores. This function must flush and invalidate because
- * of how they mapped things.
- */
-void Xil_DCacheInvalidateRange( INTPTR adr, INTPTR len )
-{
-  rtems_cache_flush_multiple_data_lines( (const void *) adr, len );
-}
+  rtems_status_code sc = rtems_interrupt_server_handler_install(
+    RTEMS_INTERRUPT_SERVER_DEFAULT,
+    ucInterruptID,
+    "CGEM Handler",
+    RTEMS_INTERRUPT_UNIQUE,
+    pxHandler,
+    pvCallBackRef
+  );
+
+  return sc;
+} 

@@ -329,11 +329,18 @@ s32_t xemacpsif_input(struct netif *netif)
 
 #if !NO_SYS
 #if defined(__arm__) && !defined(ARMR5)
+#ifndef __rtems__
 void vTimerCallback( TimerHandle_t pxTimer )
 {
 	/* Do something if the pxTimer parameter is NULL */
 	configASSERT(pxTimer);
-
+#else /* __rtems__ */
+static rtems_timer_service_routine vTimerCallback(
+  rtems_id  timer,
+  void     *arg
+)
+{
+#endif
 	lExpireCounter++;
 	/* If the timer has expired 100 times then reset RX */
 	if(lExpireCounter >= RESETRXTIMEOUT) {
@@ -434,6 +441,7 @@ static err_t low_level_init(struct netif *netif)
 											XEMACPS_DMACR_OFFSET, dmacrreg);
 #if !NO_SYS
 #if defined(__arm__) && !defined(ARMR5)
+#ifndef __rtems__
 	/* Freertos tick is 10ms by default; set period to the same */
 	xemac->xTimer = xTimerCreate("Timer", 10, pdTRUE, ( void * ) 1, vTimerCallback);
 	if (xemac->xTimer == NULL) {
@@ -443,6 +451,15 @@ static err_t low_level_init(struct netif *netif)
 			xil_printf("In %s:Timer start failed....\r\n", __func__);
 		}
 	}
+#else /* __rtems__ */
+    rtems_status_code ret = rtems_timer_create( rtems_build_name( 'L', 'W', 'M', 'R' ), &xemac->xTimer);
+    if(RTEMS_SUCCESSFUL == ret){
+        ret = rtems_timer_fire_after(xemac->xTimer, rtems_clock_get_ticks_per_second()/100, vTimerCallback, NULL);
+    }
+    if(RTEMS_SUCCESSFUL != ret){
+        xil_printf("In %s:Timer setup failed....\r\n", __func__);
+    }
+#endif	
 #endif
 #endif
 	setup_isr(xemac);

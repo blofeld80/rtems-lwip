@@ -114,8 +114,17 @@ volatile u32_t notifyinfo[4*XLWIP_CONFIG_N_TX_DESC];
 #if defined __aarch64__
 u8_t bd_space[0x200000] __attribute__ ((aligned (0x200000)));
 #else
+#ifndef __rtems__
+u8_t bd_space[0x100000] __attribute__ ((aligned (0x100000)));
+#else /* __rtems__ */
+#if defined(__arm__) && !defined(ARMR5)
+u8_t bd_space[0x100000] __attribute__ ((section(".bsp_nocache"), aligned (0x100000)));
+#else
 u8_t bd_space[0x100000] __attribute__ ((aligned (0x100000)));
 #endif
+#endif
+#endif
+
 static volatile u32_t bd_space_index = 0;
 static volatile u32_t bd_space_attr_set = 0;
 
@@ -676,7 +685,7 @@ XStatus init_dma(struct xemac_s *xemac)
 #if defined __aarch64__
 	Xil_SetTlbAttributes((u64)bd_space, NORM_NONCACHE | INNER_SHAREABLE);
 #else
-	Xil_SetTlbAttributes((s32_t)bd_space, DEVICE_MEMORY); // addr, attr
+	//Xil_SetTlbAttributes((s32_t)bd_space, DEVICE_MEMORY); // addr, attr
 #endif
 #endif
 		bd_space_attr_set = 1;

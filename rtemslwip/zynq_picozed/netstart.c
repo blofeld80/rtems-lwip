@@ -24,45 +24,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "xil_mmu.h"
-#include <rtems/rtems/cache.h>
-#include <rtems/rtems/intr.h>
-#include <rtems/score/threadimpl.h>
-#include <libcpu/mmu-vmsav8-64.h>
-#include <stdio.h>
-#include <string.h>
+#include <netstart.h>
+#include "netif/xadapter.h"
+#include "xparameters.h"
+#include <lwip/tcpip.h>
 
-#define TWO_MB (2*1024*1024)
-#define ONE_GB (1024*1024*1024)
-
-/*
- * When altering memory attributes, Xilinx sets them for differing memory sizes
- * depending on what area of memory they are in. Any attribute changes below 4GB
- * apply to 2MB chunks while any changes above 4GB apply to 1GB chunks.
- */
-void Xil_SetTlbAttributes( UINTPTR Addr, u64 attrib )
+int start_networking(
+  struct netif  *net_interface,
+  ip_addr_t     *ipaddr,
+  ip_addr_t     *netmask,
+  ip_addr_t     *gateway,
+  unsigned char *mac_ethernet_address
+)
 {
-  rtems_status_code sc;
-  sc = aarch64_mmu_map(
-    Addr,
-    Addr < 0x100000000 ? TWO_MB : ONE_GB,
-    attrib
-  );
-  if ( sc == RTEMS_NO_MEMORY ) {
-    printf("Out of memory setting MMU attributes on ptr %p: 0x%lx\n", (void*)Addr, attrib);
-  } else if ( sc == RTEMS_INVALID_ADDRESS ) {
-    printf("Attempted to set MMU attributes on invalid ptr %p: 0x%lx\n", (void*)Addr, attrib);
-  } else if ( sc != RTEMS_SUCCESSFUL ) {
-    printf("Failed setting MMU attributes on ptr %p: 0x%lx\n", (void*)Addr, attrib);
+  start_networking_shared();
+
+  if ( !xemac_add(
+    net_interface,
+    ipaddr,
+    netmask,
+    gateway,
+    mac_ethernet_address,
+    XPAR_PS7_ETHERNET_0_BASEADDR
+       ) ) {
+    return 1;
   }
-}
 
-/*
- * The Xilinx code was written such that it assumed there was no invalidate-only
- * functionality on A53 cores. This function must flush and invalidate because
- * of how they mapped things.
- */
-void Xil_DCacheInvalidateRange( INTPTR adr, INTPTR len )
-{
-  rtems_cache_flush_multiple_data_lines( (const void *) adr, len );
+  netif_set_default( net_interface );
+
+  netif_set_up( net_interface );
+
+  sys_thread_new(
+    "xemacif_input_thread",
+    ( void ( * )( void * ) )xemacif_input_thread,
+    net_interface,
+    1024,
+    DEFAULT_THREAD_PRIO
+  );
+
+  return 0;
 }
