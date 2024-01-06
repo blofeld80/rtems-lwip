@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 On-Line Applications Research Corporation (OAR)
+ * Copyright (C) 2024 On-Line Applications Research Corporation (OAR)
  * Written by Kinsey Moore <kinsey.moore@oarcorp.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,15 +24,41 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef XPSEUDO_ASM_H
-#define XPSEUDO_ASM_H
+#include <rtems/rtems/intr.h>
+#include <rtems/score/threadimpl.h>
+#include <stdio.h>
+#include <string.h>
+#include "xil_types.h"
+#include "FreeRTOS.h"
 
-#include <rtems/score/cpu.h>
-#if defined(__arm__) && !defined(ARMR5)
-#define dsb() _ARM_Data_synchronization_barrier()
-#define isb() _ARM_Instruction_synchronization_barrier()
-#else
-#define dsb() _AARCH64_Data_synchronization_barrier()
-#endif
 
-#endif
+/*
+ * XInterruptHandler function pointer signature just happens to exactly match
+ * rtems_interrupt_handler
+ */
+BaseType_t xPortInstallInterruptHandler(
+  uint8_t           ucInterruptID,
+  XInterruptHandler pxHandler,
+  void             *pvCallBackRef
+)
+{
+  char name[10];
+
+  /* Is this running in the context of any interrupt server tasks? */
+  _Thread_Get_name( _Thread_Get_executing(), name, sizeof( name ) );
+  if (strcmp(name, "IRQS") == 0) {
+    /* Can't run this from within an IRQ Server thread context */
+    return RTEMS_ILLEGAL_ON_SELF;
+  }
+
+  rtems_status_code sc = rtems_interrupt_server_handler_install(
+    RTEMS_INTERRUPT_SERVER_DEFAULT,
+    ucInterruptID,
+    "CGEM Handler",
+    RTEMS_INTERRUPT_UNIQUE,
+    pxHandler,
+    pvCallBackRef
+  );
+
+  return sc;
+}

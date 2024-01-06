@@ -24,15 +24,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef XPSEUDO_ASM_H
-#define XPSEUDO_ASM_H
+#include <netstart.h>
+#include "netif/xadapter.h"
+#include "xparameters.h"
+#include <lwip/tcpip.h>
 
-#include <rtems/score/cpu.h>
-#if defined(__arm__) && !defined(ARMR5)
-#define dsb() _ARM_Data_synchronization_barrier()
-#define isb() _ARM_Instruction_synchronization_barrier()
-#else
-#define dsb() _AARCH64_Data_synchronization_barrier()
-#endif
+int start_networking(
+  struct netif  *net_interface,
+  ip_addr_t     *ipaddr,
+  ip_addr_t     *netmask,
+  ip_addr_t     *gateway,
+  unsigned char *mac_ethernet_address
+)
+{
+  start_networking_shared();
 
-#endif
+  if ( !xemac_add(
+    net_interface,
+    ipaddr,
+    netmask,
+    gateway,
+    mac_ethernet_address,
+    XPAR_PS7_ETHERNET_0_BASEADDR
+       ) ) {
+    return 1;
+  }
+
+  netif_set_default( net_interface );
+
+  netif_set_up( net_interface );
+
+  sys_thread_new(
+    "xemacif_input_thread",
+    ( void ( * )( void * ) )xemacif_input_thread,
+    net_interface,
+    1024,
+    DEFAULT_THREAD_PRIO
+  );
+
+  return 0;
+}

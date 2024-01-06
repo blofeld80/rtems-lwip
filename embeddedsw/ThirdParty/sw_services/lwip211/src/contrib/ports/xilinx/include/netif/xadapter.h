@@ -53,7 +53,11 @@ struct xemac_s {
 #if !NO_SYS
     sys_sem_t sem_rx_data_available;
 #if defined(__arm__) && !defined(ARMR5)
+#ifndef __rtems__
 	TimerHandle_t xTimer;
+#else /* __rtems__ */
+	rtems_id xTimer;
+#endif
 #endif
 #endif
 };

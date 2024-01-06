@@ -57,51 +57,6 @@ void Xil_SetTlbAttributes( UINTPTR Addr, u64 attrib )
   }
 }
 
-#include "FreeRTOS.h"
-
-/*
- * XInterruptHandler function pointer signature just happens to exactly match
- * rtems_interrupt_handler
- */
-BaseType_t xPortInstallInterruptHandler(
-  uint8_t           ucInterruptID,
-  XInterruptHandler pxHandler,
-  void             *pvCallBackRef
-)
-{
-  char name[10];
-
-  /* Is this running in the context of any interrupt server tasks? */
-  _Thread_Get_name( _Thread_Get_executing(), name, sizeof( name ) );
-  if (strcmp(name, "IRQS") == 0) {
-    /* Can't run this from within an IRQ Server thread context */
-    return RTEMS_ILLEGAL_ON_SELF;
-  }
-
-  rtems_status_code sc = rtems_interrupt_server_handler_install(
-    RTEMS_INTERRUPT_SERVER_DEFAULT,
-    ucInterruptID,
-    "CGEM Handler",
-    RTEMS_INTERRUPT_UNIQUE,
-    pxHandler,
-    pvCallBackRef
-  );
-
-  return sc;
-}
-
-/* Enable the interrupt */
-void XScuGic_EnableIntr ( u32 DistBaseAddress, u32 Int_Id )
-{
-  rtems_interrupt_vector_enable( Int_Id );
-}
-
-/* Disable the interrupt */
-void XScuGic_DisableIntr ( u32 DistBaseAddress, u32 Int_Id )
-{
-  rtems_interrupt_vector_disable( Int_Id );
-}
-
 /*
  * The Xilinx code was written such that it assumed there was no invalidate-only
  * functionality on A53 cores. This function must flush and invalidate because

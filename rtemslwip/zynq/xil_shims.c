@@ -1,6 +1,7 @@
 /*
- * Copyright (C) 2022 On-Line Applications Research Corporation (OAR)
- * Written by Kinsey Moore <kinsey.moore@oarcorp.com>
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * Copyright (C) 2024 Bernd Moessner
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -24,15 +25,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef XPSEUDO_ASM_H
-#define XPSEUDO_ASM_H
+#include "xil_mmu.h"
+#include <rtems/rtems/cache.h>
+#include <stdio.h>
+#include <string.h>
 
-#include <rtems/score/cpu.h>
-#if defined(__arm__) && !defined(ARMR5)
-#define dsb() _ARM_Data_synchronization_barrier()
-#define isb() _ARM_Instruction_synchronization_barrier()
-#else
-#define dsb() _AARCH64_Data_synchronization_barrier()
-#endif
 
-#endif
+void Xil_DCacheInvalidateRange( INTPTR adr, INTPTR len )
+{
+  rtems_cache_flush_multiple_data_lines( (const void *) adr, len );
+}
+
+void Xil_DCacheFlushRange( INTPTR adr, INTPTR len )
+{
+  Xil_DCacheInvalidateRange(adr, len );
+}

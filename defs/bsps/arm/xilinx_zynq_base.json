@@ -5,15 +5,14 @@
 		"embeddedsw/XilinxProcessorIPLib/drivers/scugic/src",
 		"embeddedsw/XilinxProcessorIPLib/drivers/emacps/src",
 		"rtemslwip/xilinx",
-		"rtemslwip/zynqmp",
-		"embeddedsw/lib/bsp/standalone/src/arm/ARMv8/64bit"
+		"rtemslwip/zynq",
+		"embeddedsw/lib/bsp/standalone/src/arm/cortexa9",
+		"embeddedsw/lib/bsp/standalone/src/arm/common"
 	],
 	"source-files-to-import": [
+		"rtemslwip/zynq/xil_shims.c",
 		"rtemslwip/xilinx/freertos.c",
 		"rtemslwip/xilinx/xscugic_hw.c",
-		"rtemslwip/zynqmp/xemacps_g.c",
-		"rtemslwip/zynqmp/xil_shims.c",
-		"rtemslwip/zynqmp/xtopology_g.c",
 		"embeddedsw/ThirdParty/sw_services/lwip211/src/contrib/ports/xilinx/netif/xadapter.c",
 		"embeddedsw/ThirdParty/sw_services/lwip211/src/contrib/ports/xilinx/netif/xpqueue.c",
 		"embeddedsw/ThirdParty/sw_services/lwip211/src/contrib/ports/xilinx/netif/xemacpsif.c",

@@ -24,15 +24,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef XPSEUDO_ASM_H
-#define XPSEUDO_ASM_H
+#ifndef __XLWIPCONFIG_H_
+#define __XLWIPCONFIG_H_
 
-#include <rtems/score/cpu.h>
-#if defined(__arm__) && !defined(ARMR5)
-#define dsb() _ARM_Data_synchronization_barrier()
-#define isb() _ARM_Instruction_synchronization_barrier()
-#else
-#define dsb() _AARCH64_Data_synchronization_barrier()
-#endif
+#define XLWIP_CONFIG_INCLUDE_GEM 1
+#define XLWIP_CONFIG_EMAC_NUMBER 0
+#define XLWIP_CONFIG_N_TX_DESC 64
+#define XLWIP_CONFIG_N_RX_DESC 64
+
+#define XLWIP_CONFIG_N_TX_COALESCE 1
+#define XLWIP_CONFIG_N_RX_COALESCE 1
 
 #endif

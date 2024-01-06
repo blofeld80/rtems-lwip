@@ -24,15 +24,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef XPSEUDO_ASM_H
-#define XPSEUDO_ASM_H
+ #include <rtems/rtems/intr.h>
+#include "xil_types.h"
 
-#include <rtems/score/cpu.h>
-#if defined(__arm__) && !defined(ARMR5)
-#define dsb() _ARM_Data_synchronization_barrier()
-#define isb() _ARM_Instruction_synchronization_barrier()
-#else
-#define dsb() _AARCH64_Data_synchronization_barrier()
-#endif
+/* Enable the interrupt */
+void XScuGic_EnableIntr ( u32 DistBaseAddress, u32 Int_Id )
+{
+  rtems_interrupt_vector_enable( Int_Id );
+}
 
-#endif
+/* Disable the interrupt */
+void XScuGic_DisableIntr ( u32 DistBaseAddress, u32 Int_Id )
+{
+  rtems_interrupt_vector_disable( Int_Id );
+}
